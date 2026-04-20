@@ -1,0 +1,211 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block page_title %}
+{{ page_title }}
+{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ page_title }}</h3>
+                        <div class="card-tools">
+                            <a href="{% url 'manage_enrollment' %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <a href="{% url 'enrollment_certificate' enrollment.id %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-file-pdf"></i> Comprovativo PDF
+                            </a>
+                            <a href="{% url 'edit_enrollment' enrollment.id %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Informações do Estudante -->
+                            <div class="col-md-6">
+                                <div class="card card-primary card-outline">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="fas fa-user"></i> Informações do Estudante
+                                        </h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td><strong>Nome Completo:</strong></td>
+                                                <td>{{ enrollment.student.admin.first_name }} {{ enrollment.student.admin.last_name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Email:</strong></td>
+                                                <td>{{ enrollment.student.admin.email }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Nº Identificação:</strong></td>
+                                                <td>{{ enrollment.student.n_identificacao }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Nº Universitário:</strong></td>
+                                                <td>{{ enrollment.student.n_universitario }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Gênero:</strong></td>
+                                                <td>{{ enrollment.student.admin.gender }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Data Nascimento:</strong></td>
+                                                <td>{{ enrollment.student.data_nascimento|date:'d/m/Y' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Telefone:</strong></td>
+                                                <td>{{ enrollment.student.telefone }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informações da Matrícula -->
+                            <div class="col-md-6">
+                                <div class="card card-info card-outline">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="fas fa-graduation-cap"></i> Informações da Matrícula
+                                        </h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td><strong>ID Matrícula:</strong></td>
+                                                <td><span class="badge badge-primary">#{{ enrollment.id }}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Turma:</strong></td>
+                                                <td>
+                                                    {% if enrollment.classroom %}
+                                                        Turma {{ enrollment.classroom.number }}
+                                                    {% else %}
+                                                        <span class="text-muted">Sem turma atribuída</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Curso:</strong></td>
+                                                <td>
+                                                    {% if enrollment.classroom %}
+                                                        {{ enrollment.classroom.course.name }}
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Semestre:</strong></td>
+                                                <td>
+                                                    <span class="badge badge-{% if enrollment.get_semester == '1' %}primary{% else %}success{% endif %}">
+                                                        {{ enrollment.get_semester }}º Semestre
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Sessão Acadêmica:</strong></td>
+                                                <td>{{ enrollment.session.start_year.year }}-{{ enrollment.session.end_year.year }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Data Matrícula:</strong></td>
+                                                <td>{{ enrollment.created_at|date:'d/m/Y H:i' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Última Atualização:</strong></td>
+                                                <td>{{ enrollment.updated_at|date:'d/m/Y H:i' }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Disciplinas Matriculadas -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card card-success card-outline">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="fas fa-book"></i> Disciplinas Matriculadas
+                                        </h3>
+                                        <div class="card-tools">
+                                            <span class="badge badge-success">{{ enrollment.subjects.count }} disciplina(s)</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if enrollment.subjects.exists %}
+                                            <div class="table-responsive">
+                                                <table class="table table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Disciplina</th>
+                                                            <th>Professor</th>
+                                                            <th>Ano Acadêmico</th>
+                                                            <th>Semestre</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for subject in enrollment.subjects.all %}
+                                                        <tr>
+                                                            <td>{{ forloop.counter }}</td>
+                                                            <td><strong>{{ subject.name }}</strong></td>
+                                                            <td>{{ subject.staff.admin.first_name }} {{ subject.staff.admin.last_name }}</td>
+                                                            <td>{{ subject.academic_year.year_name }}</td>
+                                                            <td>
+                                                                <span class="badge badge-{% if subject.get_semester == '1' %}primary{% else %}success{% endif %}">
+                                                                    {{ subject.get_semester }}º Semestre
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        {% else %}
+                                            <div class="text-center text-muted">
+                                                <i class="fas fa-book-open fa-3x mb-3"></i>
+                                                <p>Nenhuma disciplina matriculada.</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ações -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="text-center">
+                                    <a href="{% url 'enrollment_certificate' enrollment.id %}" class="btn btn-success btn-lg">
+                                        <i class="fas fa-download"></i> Baixar Comprovativo de Matrícula
+                                    </a>
+                                    <a href="{% url 'edit_enrollment' enrollment.id %}" class="btn btn-warning btn-lg ml-2">
+                                        <i class="fas fa-edit"></i> Editar Matrícula
+                                    </a>
+                                    <a href="{% url 'delete_enrollment' enrollment.id %}" 
+                                       class="btn btn-danger btn-lg ml-2"
+                                       onclick="return confirm('Tem certeza que deseja eliminar esta matrícula? Esta ação não pode ser desfeita.')">
+                                        <i class="fas fa-trash"></i> Eliminar Matrícula
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
